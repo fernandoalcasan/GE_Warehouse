@@ -1,8 +1,8 @@
 package mx.itesm.csf.indoor;
 
-import android.bluetooth.BluetoothAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -44,11 +44,8 @@ public class trilatera extends AppCompatActivity {
     private int zone = 0;
     private int beaconInput = 4;
 
-    BluetoothAdapter blu = BluetoothAdapter.getDefaultAdapter();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        blu.enable();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_trilatera);
 
@@ -86,7 +83,6 @@ public class trilatera extends AppCompatActivity {
     protected void onDestroy() {
         proximityManager.disconnect();
         proximityManager = null;
-        blu.disable();
         super.onDestroy();
     }
 
