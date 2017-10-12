@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_margin="1dp"
+        android:layout_height="62dp"
+        card_view:elevation="14dp">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/product"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:layout_above="@+id/ean"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="20dp" />
+
+            <TextView
+                android:id="@+id/ean"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/card_leave"
+                android:layout_alignStart="@+id/product" />
+
+            <ImageButton
+                android:id="@+id/card_leave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:contentDescription="Leave"
+                android:padding="8dp"
+                android:src="@drawable/ic_forward_black_24dp"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/card_delete" />
+
+            <ImageButton
+                android:id="@id/card_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:contentDescription="Delete"
+                android:padding="8dp"
+                android:src="@drawable/ic_delete_black_24dp"
+                android:layout_alignTop="@+id/card_leave"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="22dp" />
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
