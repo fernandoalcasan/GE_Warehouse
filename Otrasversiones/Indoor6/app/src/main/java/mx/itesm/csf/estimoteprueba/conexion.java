@@ -25,75 +25,78 @@ import static java.security.AccessController.getContext;
 
 public class conexion extends AppCompatActivity {
 
-    private BeaconManager beaconManager; //The beacon manager who is going to monitor and range the beacons
-    private BeaconRegion region;    //The template of region that will follow specific beacons according to the features of it
-    private int root_zone;  //The initial ranging and monitoring zone to start from
-    private boolean on_first_region, on_pause;  //Boolean values to know if the program is paused or is goint to start ranging and monitoring
-    private static final int NUM_BEACONS = 12;  //Number of beacons to use in the warehouse, in next delivery will be pulled from DB maybe
-    TextView[] TVBeacons = new TextView[NUM_BEACONS];   //Array of TextViews from the layout to print the rssi values from ranging
-    ImageView[] img_beacons = new ImageView[NUM_BEACONS];   //Array of ImageViews from the layout to change colors when a region was entered
-    BeaconRegion[] BeaconRegions = new BeaconRegion[NUM_BEACONS];   //Array of BeaconRegions to monitor while the app is working (Zones)
-    TextView zone;  //Textview to print the user's zone in the layout
-    Button reg_scan;    //Button to stop and start monitoring and ranging
+    private BeaconManager beaconManager;
+    private BeaconRegion region;
+    private int root_zone;
+    private boolean on_first_region, on_pause;
+    private static final int NUM_BEACONS = 12;
+    TextView[] TVBeacons = new TextView[NUM_BEACONS];
+    ImageView[] img_beacons = new ImageView[NUM_BEACONS];
+    BeaconRegion[] BeaconRegions = new BeaconRegion[NUM_BEACONS];
+    TextView zona;
+    Button reg_scan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_conexion);
 
-        initializeVariables();  //Obtains and gives features to the informative objects in the layout
+        inicializaVariables();  //Obtiene los objetos informativos del layout_conexion.xml
 
-        beaconManager = new BeaconManager(getApplicationContext()); //Estimote beacons manager to manage beacons
+        beaconManager = new BeaconManager(getApplicationContext());
 
-        EstimoteSDK.initialize(getApplicationContext(), "warehouse-ge-gmail-com-s-b-dpm", "3a35682f21bd1cad60f8ecd9e2a4fc70");  //Initialize application context from estimote
+        EstimoteSDK.initialize(getApplicationContext(), "warehouse-ge-gmail-com-s-b-dpm", "3a35682f21bd1cad60f8ecd9e2a4fc70");
 
-        //EstimoteSDK.enableDebugLogging(true); //Discomment this line to see the debugging from Estimote libraries at the console
+        //EstimoteSDK.enableDebugLogging(true);
     }
 
-    protected void initializeVariables() //Function to pull and set the features from the objects in the layout
+    protected void inicializaVariables() //Etiquetar los Textiews del layout
     {
-        for(int i = 0; i < NUM_BEACONS; i++)    //According to the number of beacons to use
+        for(int i = 0; i < NUM_BEACONS; i++)
         {
-            //Textviews of Beacons with their respective RSSI
+            //Textviews de Beacons con su RSSI
             String BeaconID = "beacon" + (i+1);
-            int EstID = getResources().getIdentifier(BeaconID, "id", getPackageName()); //Get the object source with the same name from the previous string
-            TVBeacons[i] = (TextView) findViewById(EstID);  //Set the resource in the array of TextViews
+            int EstID = getResources().getIdentifier(BeaconID, "id", getPackageName());
+            TVBeacons[i] = (TextView) findViewById(EstID);
 
-            //Create Regions (One per Beacon)
+            //Regiones 1 c/u Beacon
             BeaconRegions[i] = new BeaconRegion("ranged region " + (i+1), UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 12, i+1);
 
-            //ImageViews of Beacons
+            //ImageViews de Beacons
             String ImgBeaconID = "beaconIMG" + (i+1);
-            int ImgID = getResources().getIdentifier(ImgBeaconID, "id", getPackageName());  //Get the object source with the same name from the previous string
-            img_beacons[i] = (ImageView) findViewById(ImgID);   //Set the resource in the array of ImageViews
+            int ImgID = getResources().getIdentifier(ImgBeaconID, "id", getPackageName());
+            img_beacons[i] = (ImageView) findViewById(ImgID);
         }
+        //Indicador de zona (TextView)
+        zona = (TextView) findViewById(R.id.rango);
 
-        zone = (TextView) findViewById(R.id.rango); //Zone indicator (TextView)
-        on_first_region = false;    //Boolean to know if the app will start monitoring
-        on_pause = true;    //Boolean to know if the app is on pause mode
-        reg_scan = (Button) findViewById(R.id.start_btn);   //Button to start and pause monitoring
-        region = new BeaconRegion("ranged region",UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), null, null); //Setting the features for the ranging region
+        on_first_region = false;
 
-        reg_scan.setOnClickListener(new View.OnClickListener()  //Set the feature of the button when pressed
+        reg_scan = (Button) findViewById(R.id.start_btn);
+
+        region = new BeaconRegion("ranged region",UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), null, null);
+
+        on_pause = true;
+
+        reg_scan.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View view)  //If it was pressed
+            public void onClick(View view)
             {
-                if(on_pause)    //If the ranging and monitoring hasn't started or is paused
+                if(on_pause)
                 {
                     setMonitoringFeatures();
                     setRangingFeatures();
-                    start_Scanning();   //Start the ranging and monitoring
-                    reg_scan.setText("Pausar Monitoreo");   //Set the new text of the button
-                    on_pause = false;   //Set the pause mode to false
+                    start_Scanning();
+                    reg_scan.setText("Pausar Monitoreo");
+                    on_pause = false;
                 }
-                else    //If the ranging and monitoring is working
+                else
                 {
-                    zone.setText("SIN ZONA");   //Set the text from the zone indicator
-                    on_first_region = false;    //Set the Boolean to start monitoring and ranging to false
-                    stop_Scanning();    //Stop the scanning and moitoring
-                    reg_scan.setText("Iniciar Monitoreo");  //Set the new text of the button
-                    on_pause = true;    //Set the pause mode to true
+                    zona.setText("SIN ZONA");
+                    stop_Scanning();
+                    reg_scan.setText("Iniciar Monitoreo");
+                    on_pause = true;
                 }
             }
         });
@@ -114,13 +117,13 @@ public class conexion extends AppCompatActivity {
                 {
                     root_zone = minor;
                     on_first_region = true;
-                    zone.setText("ZONA: " + minor);
+                    zona.setText("ZONA: " + minor);
                 }
 
                 if(minor == root_zone + 1 || minor == root_zone - 1)
                 {
                     root_zone = minor;
-                    zone.setText("ZONA: " + minor);
+                    zona.setText("ZONA: " + minor);
                     img_beacons[minor - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
                 }
             }
