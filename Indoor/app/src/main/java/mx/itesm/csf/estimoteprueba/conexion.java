@@ -101,72 +101,72 @@ public class conexion extends AppCompatActivity {
 
     protected void setMonitoringFeatures()
     {
-        beaconManager.setBackgroundScanPeriod(200, 0);
+        beaconManager.setBackgroundScanPeriod(200, 0);  //Set the period of Monitoring that the cellphone will use to activate triggers of regions
 
-        beaconManager.setMonitoringListener(new BeaconManager.BeaconMonitoringListener()
+        beaconManager.setMonitoringListener(new BeaconManager.BeaconMonitoringListener()    //Set the features of the listener for the beacon monitoring
         {
             @Override
-            public void onEnteredRegion(BeaconRegion beaconRegion, List<Beacon> beacons)
+            public void onEnteredRegion(BeaconRegion beaconRegion, List<Beacon> beacons)    //When a region is entered
             {
-                int minor = beaconRegion.getMinor();
+                int minor = beaconRegion.getMinor();    //Get the minor from that region
 
-                if(!on_first_region)
+                if(!on_first_region)    //If the region is the first to be monitored
                 {
-                    root_zone = minor;
-                    on_first_region = true;
-                    zone.setText("ZONA: " + minor);
+                    root_zone = minor;  //Set the root zone value equal to the minor of the region entered
+                    on_first_region = true; //Set Boolean to true so now it is known that the first region was entered
+                    zone.setText("ZONA: " + minor); //Set the text of the zone indicator to the zone that was entered
                 }
 
-                if(minor == root_zone + 1 || minor == root_zone - 1)
+                if(minor == root_zone + 1 || minor == root_zone - 1) //If the new region entered is in adjacency of the previous entered region
                 {
-                    root_zone = minor;
-                    zone.setText("ZONA: " + minor);
-                    img_beacons[minor - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+                    root_zone = minor;  //Set the root zone value equal to the minor of the region entered
+                    zone.setText("ZONA: " + minor); //Set the text of the zone indicator to the zone that was entered
+                    img_beacons[minor - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //Set Red the image of the Beacon Region that was entered
                 }
             }
 
             @Override
             public void onExitedRegion(BeaconRegion beaconRegion)
             {
-                img_beacons[beaconRegion.getMinor() - 1].setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_ATOP);
+                img_beacons[beaconRegion.getMinor() - 1].setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_ATOP); //Set Yellow the Beacon Region that was exited
             }
         });
     }
 
     protected void setRangingFeatures()
     {
-        beaconManager.setForegroundScanPeriod(200,0);
+        beaconManager.setForegroundScanPeriod(200,0);   //Set the time of ranging periods in the cellphone to range beacons
 
-        beaconManager.setRangingListener(new BeaconManager.BeaconRangingListener()
+        beaconManager.setRangingListener(new BeaconManager.BeaconRangingListener()  //Set the Ranging listener and its features to range the beacons
         {
             @Override
-            public void onBeaconsDiscovered(BeaconRegion region, List<Beacon> list)
+            public void onBeaconsDiscovered(BeaconRegion region, List<Beacon> list) //On Beacon(s) discovered near to the cellphone
             {
-                if (!list.isEmpty())
+                if (!list.isEmpty())    //If the list is empty  and no beacon was recognized
                 {
-                    for(int i = 0; i < list.size(); i++)
+                    for(int i = 0; i < list.size(); i++)    //Loop to check the list of beacons that were discovered
                     {
-                        int num_beacon = list.get(i).getMinor();
-                        if(num_beacon <= NUM_BEACONS)
-                            TVBeacons[num_beacon - 1].setText("Beacon " + num_beacon + " :" + Integer.toString(list.get(i).getRssi()));
+                        int num_beacon = list.get(i).getMinor();    //Get the minor from the beacon discovered
+                        if(num_beacon <= NUM_BEACONS)   //If the beacon minor is on range of the beacons used
+                            TVBeacons[num_beacon - 1].setText("Beacon " + num_beacon + " :" + Integer.toString(list.get(i).getRssi())); //Set the text of the layout's TextView to print the RSSI of the beacon and its name
                     }
                 }
             }
         });
     }
 
-    protected void start_Scanning()
+    protected void start_Scanning() //Function to start ranging and monitoring of the functions
     {
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback()
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback()  //Start the connection by the beacon manager
         {
             @Override
-            public void onServiceReady()
+            public void onServiceReady()    //Check if the Estimote's app ID is correct and there's no problem in ranging and monitoring beacons
             {
-                for(int i = 0; i < NUM_BEACONS; i++)
+                for(int i = 0; i < NUM_BEACONS; i++)    //Start the monitoring of all regions
                 {
                     beaconManager.startMonitoring(BeaconRegions[i]);
                 }
-                beaconManager.startRanging(region);
+                beaconManager.startRanging(region); //Start the ranging of all beacons
             }
         });
     }
@@ -176,41 +176,32 @@ public class conexion extends AppCompatActivity {
         beaconManager.connect(new BeaconManager.ServiceReadyCallback()
         {
             @Override
-            public void onServiceReady()
+            public void onServiceReady() //Check if the Estimote's app ID is correct and there's no problem in ranging and monitoring beacons
             {
-                for(int i = 0; i < NUM_BEACONS; i++)
+                for(int i = 0; i < NUM_BEACONS; i++)  //Stop the monitoring of all regions
                 {
                     beaconManager.stopMonitoring("ranged region " + (i+1));
                 }
-                beaconManager.stopRanging(region);
+                beaconManager.stopRanging(region);  //Stop the ranging of all beacons
             }
         });
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume() //Default function of Android Studio to know if the app is running
+    {
         super.onResume();
-
-        SystemRequirementsChecker.checkWithDefaultDialogs(this);
-
-        /*beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override
-            public void onServiceReady() {
-                beaconManager.startRanging(region);
-            }
-        });*/
+        SystemRequirementsChecker.checkWithDefaultDialogs(this);    //Check if requirements of the cellphone are accomplished to make the app work
     }
 
     @Override
-    protected void onPause() {
-        //beaconManager.stopRanging(region);
-
+    protected void onPause() //Default function of Android Studio to know if the app is on pause
+    {
         super.onPause();
     }
 
-    public double getDistance(int rssi)
+    protected double getDistance(int rssi)  //Functin to return the distance of the beacon when it is ranged
     {
         return Math.pow(10, (( -69 - rssi)/20));
     }
-
 }
