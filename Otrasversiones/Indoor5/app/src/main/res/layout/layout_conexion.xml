@@ -7,15 +7,6 @@
     tools:context="mx.itesm.csf.estimoteprueba.conexion"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/start_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorPrimaryDark"
-        android:text="Iniciar Monitoreo"
-        android:textColor="@android:color/white"
-        android:textStyle="bold" />
-
     <TextView
         android:id="@+id/Titulo"
         android:layout_width="match_parent"
@@ -130,6 +121,14 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/zona"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:textAlignment="center" />
+
+    <TextView
         android:id="@+id/rango"
         android:layout_width="346dp"
         android:layout_height="wrap_content"
@@ -149,7 +148,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="18dp"
-            android:layout_marginTop="-5dp"
+            android:layout_marginTop="-12dp"
             android:text="///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///\n///|          ||//////||          ||//////||          |///"
             android:textAlignment="center" />
 
