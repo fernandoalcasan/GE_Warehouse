@@ -35,7 +35,6 @@ public class conexion extends AppCompatActivity {
     BeaconRegion[] BeaconRegions = new BeaconRegion[NUM_BEACONS];   //Array of BeaconRegions to monitor while the app is working (Zones)
     TextView zone;  //Textview to print the user's zone in the layout
     Button reg_scan;    //Button to stop and start monitoring and ranging
-    Bicon[] BeaconsDeployed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,16 +183,6 @@ public class conexion extends AppCompatActivity {
                     beaconManager.stopMonitoring("ranged region " + (i+1));
                 }
                 beaconManager.stopRanging(region);  //Stop the ranging of all beacons
-            }
-        });
-    }
-
-    protected void start_Configuration()
-    {
-        beaconManager.setConfigurableDevicesListener(new BeaconManager.ConfigurableDevicesListener() {
-            @Override
-            public void onConfigurableDevicesFound(List<ConfigurableDevice> configurableDevices) {
-
             }
         });
     }

@@ -1,58 +1,42 @@
 package mx.itesm.csf.estimoteprueba;
 
 import com.estimote.mgmtsdk.feature.settings.api.Beacon;
+import com.estimote.coresdk.common.config.EstimoteSDK;
+import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
+
+import java.util.UUID;
 
 public class Bicon {
-    protected int pasillo;
-    protected int zonaSup;
-    protected int zonaInf;
-    protected boolean af_wall;
-    protected Beacon hardware;
 
-    public int getPasillo()
+    protected BeaconRegion region;
+    protected int hall; //pasillo
+    int[] beaconsInAdjacency;
+    int counter = 0;
+    int minor;
+    int major;
+    UUID uuid_beacon;
+
+    public int getHall()
     {
-        return pasillo;
+        return hall;
     }
-
-    public void setPasillo(int a)
+    public void setHall(int a) { hall = a; }
+    public int getRegionID(){ return region.getMinor(); }
+    public void setRegion(BeaconRegion zone){ region = zone; }
+    public BeaconRegion getRegion(){return region;}
+    public int[] getBeaconsInAdjacency() {return beaconsInAdjacency;}
+    public void setNoOfBIA(int x) {beaconsInAdjacency = new int[x];}
+    public int getMinor() {return minor;}
+    public void setMinor(int x) {minor = x;}
+    public int getMajor() {return major;}
+    public void setMajor(int x) {major = x;}
+    public UUID getUUID() {return uuid_beacon;}
+    public void setUUID(UUID u) {uuid_beacon = u;}
+    public void setValuesByRegion()
     {
-        pasillo = a;
+        minor = region.getMinor();
+        major = region.getMajor();
+        uuid_beacon = region.getProximityUUID();
     }
-
-    public int getZona(int a)
-    {
-        if(a == 1)
-            return zonaSup;
-        else
-            return zonaInf;
-    }
-
-    public void setZona(int a, int z)
-    {
-        if(a == 1)
-            zonaSup = z;
-        else
-            zonaInf = z;
-    }
-
-    public boolean estaPorPared()
-    {
-        return af_wall;
-    }
-
-    public void setPorPared(boolean a)
-    {
-        af_wall = a;
-    }
-
-    public Beacon getBeacon()
-    {
-        return hardware;
-    }
-
-    public void setBeacon(Beacon a)
-    {
-        hardware = a;
-    }
-
+    public void addAdjacencyBeacon(int x) {beaconsInAdjacency[counter++] = x;}
 }
