@@ -18,7 +18,6 @@ import com.estimote.coresdk.recognition.packets.ConfigurableDevice;
 import com.estimote.coresdk.recognition.packets.DeviceType;
 import com.estimote.coresdk.service.BeaconManager;
 
-
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +36,6 @@ public class conexion extends AppCompatActivity {
     TextView zone;  //Textview to print the user's zone in the layout
     Button reg_scan;    //Button to stop and start monitoring and ranging
     Bicon[] BeaconsDeployed;
-    Request beaconsrequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +47,6 @@ public class conexion extends AppCompatActivity {
         beaconManager = new BeaconManager(getApplicationContext()); //Estimote beacons manager to manage beacons
 
         EstimoteSDK.initialize(getApplicationContext(), "warehouse-ge-gmail-com-s-b-dpm", "3a35682f21bd1cad60f8ecd9e2a4fc70");  //Initialize application context from estimote
-
-        beaconsrequest = new Request(getApplicationContext());
 
         //EstimoteSDK.enableDebugLogging(true); //Discomment this line to see the debugging from Estimote libraries at the console
     }

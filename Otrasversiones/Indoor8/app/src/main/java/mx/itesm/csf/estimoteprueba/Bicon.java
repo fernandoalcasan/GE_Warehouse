@@ -4,7 +4,6 @@ import com.estimote.mgmtsdk.feature.settings.api.Beacon;
 import com.estimote.coresdk.common.config.EstimoteSDK;
 import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class Bicon {
@@ -12,28 +11,11 @@ public class Bicon {
     protected BeaconRegion region;
     protected int hall; //pasillo
     int[] beaconsInAdjacency;
-    float x, y;
     int counter = 0;
-    int minor, major, zone;
+    int minor;
+    int major;
     UUID uuid_beacon;
-    int vertex_1, vertex_2;
-    HashMap<Integer, Integer> floors = new HashMap<Integer, Integer>();
 
-    Bicon(String uuid, int maj, int min, int hal, float posX, float posY, int depZone, int v1, int v2)
-    {
-        uuid_beacon = UUID.fromString(uuid);
-        major = maj;
-        minor = min;
-        vertex_1 = v1;
-        vertex_2 = v2;
-        zone = depZone;
-        region = new BeaconRegion("region " + min, uuid_beacon, major, minor);
-        hall = hal;
-        x = posX;
-        y = posY;
-    }
-
-    public void setFloor(int fl, int id){ floors.put(fl, id); }
     public int getHall()
     {
         return hall;
