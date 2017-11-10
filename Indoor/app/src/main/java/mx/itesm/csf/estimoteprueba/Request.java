@@ -27,7 +27,7 @@ public class Request {
     // Context of the class
     Context context;
 
-    // SQLite adapter
+    //SQLite adapter
     //SQLiteAdapter db;
     HashMap<Integer, Bicon> beacons;
 
@@ -38,7 +38,17 @@ public class Request {
 
     }
 
-    public Bicon[] GetDeployedBeacons()
+    public HashMap<Integer, Bicon> GetDeployedBeacons()
+    {
+        HashMap<Integer, Bicon> min_beacons = new HashMap<Integer, Bicon>();
+        for (Bicon beacon : beacons.values())
+        {
+            min_beacons.put(beacon.getMinor(), beacon);
+        }
+        return min_beacons;
+    }
+
+    /*public Bicon[] GetDeployedBeacons()
     {
         Bicon[] beaconsArray = new Bicon[beacons.size()];
         for(int i = 0; i < beacons.size(); i++)
@@ -47,13 +57,14 @@ public class Request {
             beaconsArray[temp.zone - 1] = temp;
         }
         return beaconsArray;
-    }
+    }*/
 
-    public void setFloors()
+    public void setFloorsNAdj()
     {
-        for(int i = 1; i <= beacons.size(); i++)
+        for (Bicon beacon : beacons.values())
         {
-            RequestFloors("beaconSections", String.valueOf(i));
+            RequestFloors("sectionBeacon_id", String.valueOf(beacon.getZone()));
+            RequestAdjacencies("adjacencies", String.valueOf(beacon.getZone()));
         }
     }
 
@@ -104,7 +115,70 @@ public class Request {
         VolleySingleton.getInstance().addToRequestQueue(sr);
     }
 
-    public void RequestFloors(final String status, final String BID) //status = "floors", beacon_id = BID
+
+    public void RequestAdjacencies(final String status, final String BID) //status = adjacencies, BID = beacon_id
+    {
+        StringRequest sr = new StringRequest(com.android.volley.Request.Method.POST, URL, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                try
+                {
+                    JSONArray array = new JSONArray(response);
+
+                    for(int i = 0; i < array.length(); i++)
+                    {
+                        beacons.get(Integer.parseInt(BID)).initializeBiA(array.length());
+                        JSONObject adj_zone = (JSONObject) array.get(i);
+
+                        try
+                        {
+                            int adjacent_id = Integer.parseInt(adj_zone.getString("adjacent"));
+                            beacons.get(Integer.parseInt(BID)).insertBiA(i,adjacent_id); //Insert adjacent beacon to the Bicon object
+                        }
+                        catch(NumberFormatException e)
+                        {
+                            Message.message(context, "ERROR: " + e);
+                        }
+                    }
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    Message.message(context, "Error: " + e.getMessage());
+                }
+            }
+        }, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                Message.message(context, "Error to connect (floors)");
+            }
+        }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<>();
+                params.put("s", status);
+                params.put("beacon_id", BID);
+                return params;
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                String encodedString = Base64.encodeToString(String.format("%s:%s", "app_client", "prueba123").getBytes(), Base64.NO_WRAP);
+                String infoAut = String.format("Basic %s", encodedString);
+                headers.put("Authorization", infoAut);
+                return headers;
+            }
+        };
+        VolleySingleton.getInstance().addToRequestQueue(sr);
+    }
+
+
+    public void RequestFloors(final String status, final String BID) //status = "sectionBeacon_id", beacon_id = BID
     {
         StringRequest sr = new StringRequest(com.android.volley.Request.Method.POST, URL, new Response.Listener<String>()
         {
@@ -218,7 +292,7 @@ public class Request {
                         // Insert the Beacons object with the corresponding configurations in the beacons array
                         beacons.put(id, new Bicon(uuid, major, minor, hall, posX, posY, id, v1, v2));
                     }
-                    setFloors(); //Set the floors in the hashmap of the Bicon class objects
+                    setFloorsNAdj(); //Set the floors and the adjacencies in the hashmap of the Bicon class objects
                 }
                 catch (JSONException e)
                 {

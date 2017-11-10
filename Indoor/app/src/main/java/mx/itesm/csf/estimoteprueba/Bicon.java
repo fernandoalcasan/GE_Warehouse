@@ -13,10 +13,10 @@ public class Bicon {
     protected int hall; //pasillo
     int[] beaconsInAdjacency;
     float x, y;
-    int counter = 0;
     int minor, major, zone;
     UUID uuid_beacon;
     int vertex_1, vertex_2;
+    String region_id;
     HashMap<Integer, Integer> floors = new HashMap<Integer, Integer>();
 
     Bicon(String uuid, int maj, int min, int hal, float posX, float posY, int depZone, int v1, int v2)
@@ -27,19 +27,21 @@ public class Bicon {
         vertex_1 = v1;
         vertex_2 = v2;
         zone = depZone;
-        region = new BeaconRegion("region " + min, uuid_beacon, major, minor);
+        region_id = "ranged region ";
+        region = new BeaconRegion(region_id + zone, uuid_beacon, major, minor);
         hall = hal;
         x = posX;
         y = posY;
     }
 
+    public int getZone(){ return zone; }
     public void setFloor(int fl, int id){ floors.put(fl, id); }
     public int getHall()
     {
         return hall;
     }
     public void setHall(int a) { hall = a; }
-    public int getRegionID(){ return region.getMinor(); }
+    public String getRegionID(){ return region_id; }
     public void setRegion(BeaconRegion zone){ region = zone; }
     public BeaconRegion getRegion(){return region;}
     public int[] getBeaconsInAdjacency() {return beaconsInAdjacency;}
@@ -50,11 +52,15 @@ public class Bicon {
     public void setMajor(int x) {major = x;}
     public UUID getUUID() {return uuid_beacon;}
     public void setUUID(UUID u) {uuid_beacon = u;}
-    public void setValuesByRegion()
+    public void initializeBiA(int x) {beaconsInAdjacency = new int[x];}
+    public void insertBiA(int x, int z) {beaconsInAdjacency[x] = z;}
+    public boolean isAdjacent(int x)
     {
-        minor = region.getMinor();
-        major = region.getMajor();
-        uuid_beacon = region.getProximityUUID();
+        for(int i = 0; i < beaconsInAdjacency.length; i++)
+        {
+            if(x == beaconsInAdjacency[i])
+                return true;
+        }
+        return false;
     }
-    public void addAdjacencyBeacon(int x) {beaconsInAdjacency[counter++] = x;}
 }

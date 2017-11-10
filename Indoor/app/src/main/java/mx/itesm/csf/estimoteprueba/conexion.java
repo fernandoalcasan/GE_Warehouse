@@ -19,6 +19,7 @@ import com.estimote.coresdk.recognition.packets.DeviceType;
 import com.estimote.coresdk.service.BeaconManager;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,7 +37,7 @@ public class conexion extends AppCompatActivity {
     BeaconRegion[] BeaconRegions = new BeaconRegion[NUM_BEACONS];   //Array of BeaconRegions to monitor while the app is working (Zones)
     TextView zone;  //Textview to print the user's zone in the layout
     Button reg_scan;    //Button to stop and start monitoring and ranging
-    Bicon[] BeaconsDeployed;
+    HashMap<Integer, Bicon> BeaconsDeployed;
     Request beaconsrequest;
 
     @Override
@@ -51,6 +52,8 @@ public class conexion extends AppCompatActivity {
         EstimoteSDK.initialize(getApplicationContext(), "warehouse-ge-gmail-com-s-b-dpm", "3a35682f21bd1cad60f8ecd9e2a4fc70");  //Initialize application context from estimote
 
         beaconsrequest = new Request(getApplicationContext());
+        beaconsrequest.RequestBeaconsConfiguration("beacons");
+        BeaconsDeployed = beaconsrequest.GetDeployedBeacons();
 
         //EstimoteSDK.enableDebugLogging(true); //Discomment this line to see the debugging from Estimote libraries at the console
     }
@@ -65,7 +68,7 @@ public class conexion extends AppCompatActivity {
             TVBeacons[i] = (TextView) findViewById(EstID);  //Set the resource in the array of TextViews
 
             //Create Regions (One per Beacon)
-            BeaconRegions[i] = new BeaconRegion("ranged region " + (i+1), UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 12, i+1);
+            //BeaconRegions[i] = new BeaconRegion("ranged region " + (i+1), UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 12, i+1);
 
             //ImageViews of Beacons
             String ImgBeaconID = "beaconIMG" + (i+1);
@@ -77,7 +80,7 @@ public class conexion extends AppCompatActivity {
         on_first_region = false;    //Boolean to know if the app will start monitoring
         on_pause = true;    //Boolean to know if the app is on pause mode
         reg_scan = (Button) findViewById(R.id.start_btn);   //Button to start and pause monitoring
-        region = new BeaconRegion("ranged region",UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), null, null); //Setting the features for the ranging region
+        region = new BeaconRegion("ranged region",UUID.fromString("4e6ed5ab-b3ed-4e10-8247-c5f5524d4b21"), null, null); //Setting the features for the ranging region
 
         reg_scan.setOnClickListener(new View.OnClickListener()  //Set the feature of the button when pressed
         {
@@ -113,27 +116,28 @@ public class conexion extends AppCompatActivity {
             @Override
             public void onEnteredRegion(BeaconRegion beaconRegion, List<Beacon> beacons)    //When a region is entered
             {
-                int minor = beaconRegion.getMinor();    //Get the minor from that region
+                //int minor = beaconRegion.getMinor();    //Get the minor from that region
+                int reg_zone = BeaconsDeployed.get(beaconRegion.getMinor()).getZone();    //Get the zone from that region
 
                 if(!on_first_region)    //If the region is the first to be monitored
                 {
-                    root_zone = minor;  //Set the root zone value equal to the minor of the region entered
+                    root_zone = reg_zone;  //Set the root zone value equal to the minor of the region entered
                     on_first_region = true; //Set Boolean to true so now it is known that the first region was entered
-                    zone.setText("ZONA: " + minor); //Set the text of the zone indicator to the zone that was entered
+                    zone.setText("ZONA: " + reg_zone); //Set the text of the zone indicator to the zone that was entered
                 }
 
-                if(minor == root_zone + 1 || minor == root_zone - 1) //If the new region entered is in adjacency of the previous entered region
+                if(BeaconsDeployed.get(beaconRegion.getMinor()).isAdjacent(reg_zone)) //If the new region entered is in adjacency of the previous entered region
                 {
-                    root_zone = minor;  //Set the root zone value equal to the minor of the region entered
-                    zone.setText("ZONA: " + minor); //Set the text of the zone indicator to the zone that was entered
-                    img_beacons[minor - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //Set Red the image of the Beacon Region that was entered
+                    root_zone = reg_zone;  //Set the root zone value equal to the minor of the region entered
+                    zone.setText("ZONA: " + reg_zone); //Set the text of the zone indicator to the zone that was entered
+                    img_beacons[reg_zone - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //Set Red the image of the Beacon Region that was entered
                 }
             }
 
             @Override
             public void onExitedRegion(BeaconRegion beaconRegion)
             {
-                img_beacons[beaconRegion.getMinor() - 1].setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_ATOP); //Set Yellow the Beacon Region that was exited
+                img_beacons[BeaconsDeployed.get(beaconRegion.getMinor()).getZone() - 1].setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_ATOP); //Set Yellow the Beacon Region that was exited
             }
         });
     }
@@ -167,9 +171,9 @@ public class conexion extends AppCompatActivity {
             @Override
             public void onServiceReady()    //Check if the Estimote's app ID is correct and there's no problem in ranging and monitoring beacons
             {
-                for(int i = 0; i < NUM_BEACONS; i++)    //Start the monitoring of all regions
+                for (Bicon beacon : BeaconsDeployed.values())   //Start the monitoring of all regions
                 {
-                    beaconManager.startMonitoring(BeaconRegions[i]);
+                    beaconManager.startMonitoring(beacon.getRegion());
                 }
                 beaconManager.startRanging(region); //Start the ranging of all beacons
             }
@@ -183,16 +187,16 @@ public class conexion extends AppCompatActivity {
             @Override
             public void onServiceReady() //Check if the Estimote's app ID is correct and there's no problem in ranging and monitoring beacons
             {
-                for(int i = 0; i < NUM_BEACONS; i++)  //Stop the monitoring of all regions
+                for (Bicon beacon : BeaconsDeployed.values())   //Stop the monitoring of all regions
                 {
-                    beaconManager.stopMonitoring("ranged region " + (i+1));
+                    beaconManager.stopMonitoring(beacon.getRegionID() + beacon.getZone());
                 }
                 beaconManager.stopRanging(region);  //Stop the ranging of all beacons
             }
         });
     }
 
-    protected void start_Configuration()
+/*    protected void start_Configuration()
     {
         beaconManager.setConfigurableDevicesListener(new BeaconManager.ConfigurableDevicesListener() {
             @Override
@@ -200,7 +204,7 @@ public class conexion extends AppCompatActivity {
 
             }
         });
-    }
+    }*/
 
     @Override
     protected void onResume() //Default function of Android Studio to know if the app is running
