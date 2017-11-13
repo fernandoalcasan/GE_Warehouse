@@ -11,16 +11,16 @@ import android.widget.TextView;
 
 import com.estimote.coresdk.common.config.EstimoteSDK;
 import com.estimote.coresdk.common.requirements.SystemRequirementsChecker;
+import com.estimote.coresdk.observation.region.Region;
 import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
 import com.estimote.coresdk.recognition.packets.Beacon;
+import com.estimote.coresdk.recognition.packets.ConfigurableDevice;
+import com.estimote.coresdk.recognition.packets.DeviceType;
 import com.estimote.coresdk.service.BeaconManager;
 
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.UUID;
 
 import static java.security.AccessController.getContext;
@@ -38,7 +38,6 @@ public class conexion extends AppCompatActivity {
     TextView zone;  //Textview to print the user's zone in the layout
     Button reg_scan;    //Button to stop and start monitoring and ranging
     HashMap<Integer, Bicon> BeaconsDeployed;
-    Queue<Integer> queueZones;
     Request beaconsrequest;
 
     @Override
@@ -82,7 +81,6 @@ public class conexion extends AppCompatActivity {
         on_pause = true;    //Boolean to know if the app is on pause mode
         reg_scan = (Button) findViewById(R.id.start_btn);   //Button to start and pause monitoring
         region = new BeaconRegion("ranged region",UUID.fromString("4e6ed5ab-b3ed-4e10-8247-c5f5524d4b21"), null, null); //Setting the features for the ranging region
-        queueZones = new LinkedList<Integer>();
 
         reg_scan.setOnClickListener(new View.OnClickListener()  //Set the feature of the button when pressed
         {
@@ -109,29 +107,6 @@ public class conexion extends AppCompatActivity {
         });
     }
 
-    protected void removeElementFromQueue(int x)
-    {
-        for(Integer in : queueZones)
-        {
-            if(in == x)
-            {
-                queueZones.remove(in);
-                break;
-            }
-        }
-    }
-
-    protected boolean adjacentToQueue(int x)
-    {
-        Iterator<Integer> it = queueZones.iterator();
-        while(it.hasNext())
-        {
-            if(BeaconsDeployed.get(it.next()).isAdjacent(x))
-                return true;
-        }
-        return false;
-    }
-
     protected void setMonitoringFeatures()
     {
         beaconManager.setBackgroundScanPeriod(200, 0);  //Set the period of Monitoring that the cellphone will use to activate triggers of regions
@@ -141,34 +116,27 @@ public class conexion extends AppCompatActivity {
             @Override
             public void onEnteredRegion(BeaconRegion beaconRegion, List<Beacon> beacons)    //When a region is entered
             {
-            //int minor = beaconRegion.getMinor();    //Get the minor from that region
-            int reg_zone = BeaconsDeployed.get(beaconRegion.getMinor()).getZone();    //Get the zone from that region
+                //int minor = beaconRegion.getMinor();    //Get the minor from that region
+                int reg_zone = BeaconsDeployed.get(beaconRegion.getMinor()).getZone();    //Get the zone from that region
 
-            if(!on_first_region)    //If the region is the first to be monitored
-            {
-                queueZones.clear();
-                queueZones.add(beaconRegion.getMinor());
-                root_zone = reg_zone;  //Set the root zone value equal to the minor of the region entered
-                on_first_region = true; //Set Boolean to true so now it is known that the first region was entered
-                zone.setText("ZONA: " + reg_zone); //Set the text of the zone indicator to the zone that was entered
-            }
+                if(!on_first_region)    //If the region is the first to be monitored
+                {
+                    root_zone = reg_zone;  //Set the root zone value equal to the minor of the region entered
+                    on_first_region = true; //Set Boolean to true so now it is known that the first region was entered
+                    zone.setText("ZONA: " + reg_zone); //Set the text of the zone indicator to the zone that was entered
+                }
 
-            //BeaconsDeployed.get(beaconRegion.getMinor()).isAdjacent(reg_zone)
-            if(adjacentToQueue(reg_zone)) //If the new region entered is in adjacency of the previous entered regions
-            {
-                queueZones.add(beaconRegion.getMinor());
-                root_zone = reg_zone;  //Set the root zone value equal to the minor of the region entered
-                zone.setText("ZONA: " + reg_zone); //Set the text of the zone indicator to the zone that was entered
-                img_beacons[reg_zone - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //Set Red the image of the Beacon Region that was entered
+                if(BeaconsDeployed.get(beaconRegion.getMinor()).isAdjacent(reg_zone)) //If the new region entered is in adjacency of the previous entered region
+                {
+                    root_zone = reg_zone;  //Set the root zone value equal to the minor of the region entered
+                    zone.setText("ZONA: " + reg_zone); //Set the text of the zone indicator to the zone that was entered
+                    img_beacons[reg_zone - 1].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //Set Red the image of the Beacon Region that was entered
+                }
             }
-        }
 
             @Override
             public void onExitedRegion(BeaconRegion beaconRegion)
             {
-                removeElementFromQueue(beaconRegion.getMinor()); //Remove the specific zone that was left
-                if(!queueZones.isEmpty())
-                    root_zone = BeaconsDeployed.get(queueZones.element()).getZone();
                 img_beacons[BeaconsDeployed.get(beaconRegion.getMinor()).getZone() - 1].setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_ATOP); //Set Yellow the Beacon Region that was exited
             }
         });
@@ -227,6 +195,16 @@ public class conexion extends AppCompatActivity {
             }
         });
     }
+
+/*    protected void start_Configuration()
+    {
+        beaconManager.setConfigurableDevicesListener(new BeaconManager.ConfigurableDevicesListener() {
+            @Override
+            public void onConfigurableDevicesFound(List<ConfigurableDevice> configurableDevices) {
+
+            }
+        });
+    }*/
 
     @Override
     protected void onResume() //Default function of Android Studio to know if the app is running

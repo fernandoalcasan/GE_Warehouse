@@ -11,7 +11,7 @@ public class Bicon {
 
     protected BeaconRegion region;
     protected int hall; //pasillo
-    int[] beaconsInAdjacency = null;
+    int[] beaconsInAdjacency;
     float x, y;
     int minor, major, zone;
     UUID uuid_beacon;
@@ -45,7 +45,7 @@ public class Bicon {
     public void setRegion(BeaconRegion zone){ region = zone; }
     public BeaconRegion getRegion(){return region;}
     public int[] getBeaconsInAdjacency() {return beaconsInAdjacency;}
-    public void setBiA(int[] adj) {beaconsInAdjacency = adj;}
+    public void setNoOfBIA(int x) {beaconsInAdjacency = new int[x];}
     public int getMinor() {return minor;}
     public void setMinor(int x) {minor = x;}
     public int getMajor() {return major;}
@@ -54,8 +54,6 @@ public class Bicon {
     public void setUUID(UUID u) {uuid_beacon = u;}
     public void initializeBiA(int x) {beaconsInAdjacency = new int[x];}
     public void insertBiA(int x, int z) {beaconsInAdjacency[x] = z;}
-    public int[] getBiA() {return beaconsInAdjacency;}
-
     public boolean isAdjacent(int x)
     {
         for(int i = 0; i < beaconsInAdjacency.length; i++)

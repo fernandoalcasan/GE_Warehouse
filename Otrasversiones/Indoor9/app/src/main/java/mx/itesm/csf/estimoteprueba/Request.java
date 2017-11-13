@@ -15,7 +15,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Request {
@@ -30,7 +29,7 @@ public class Request {
 
     //SQLite adapter
     //SQLiteAdapter db;
-    HashMap<Integer, Bicon> beacons = new HashMap<Integer, Bicon>();;
+    HashMap<Integer, Bicon> beacons;
 
     // Constructor of the class
     Request(Context context){
@@ -126,34 +125,21 @@ public class Request {
             {
                 try
                 {
-                    JSONObject object = new JSONObject(response);
+                    JSONArray array = new JSONArray(response);
 
-                    if(object.getString("status") == "001")
+                    for(int i = 0; i < array.length(); i++)
                     {
-                        beacons.get(Integer.parseInt(BID)).initializeBiA(object.length());
-                        Iterator<String> keys = object.keys();
-                        int i = 0;
+                        beacons.get(Integer.parseInt(BID)).initializeBiA(array.length());
+                        JSONObject adj_zone = (JSONObject) array.get(i);
 
-                        while( keys.hasNext() )
+                        try
                         {
-                            String key = keys.next();
-
-                            if (key != "status")
-                            {
-                                JSONObject adjBeacon = object.getJSONObject(key);
-
-                                try
-                                {
-                                    int adjacent_id = adjBeacon.getInt("adjacent");
-                                    beacons.get(Integer.parseInt(BID)).insertBiA(i,adjacent_id); //Insert adjacent beacon to the Bicon object
-                                }
-                                catch(NumberFormatException e)
-                                {
-                                    Message.message(context, "ERROR: " + e);
-                                }
-
-                                i++;
-                            }
+                            int adjacent_id = Integer.parseInt(adj_zone.getString("adjacent"));
+                            beacons.get(Integer.parseInt(BID)).insertBiA(i,adjacent_id); //Insert adjacent beacon to the Bicon object
+                        }
+                        catch(NumberFormatException e)
+                        {
+                            Message.message(context, "ERROR: " + e);
                         }
                     }
                 }
@@ -201,36 +187,23 @@ public class Request {
             {
                 try
                 {
-                    JSONObject object = new JSONObject(response);
-                    if(object.getString("status") == "001")
+                    JSONArray array = new JSONArray(response);
+
+                    for(int i = 0; i < array.length(); i++)
                     {
-                        Iterator<String> keys = object.keys();
+                        JSONObject section = (JSONObject) array.get(i);
 
-                        while(keys.hasNext())
+                        try
                         {
-                            String key = keys.next();
+                            int beacon_id = Integer.parseInt(section.getString("beacon_id"));
+                            int section_id = Integer.parseInt(section.getString("id"));
+                            int floor = Integer.parseInt(section.getString("floor"));
 
-                            if (key != "status")
-                            {
-                                JSONObject section = object.getJSONObject(key);
-
-                                int beacon_id, section_id, floor;
-                                beacon_id = section_id = floor = 0;
-
-                                try
-                                {
-                                    beacon_id = section.getInt("beacon_id");
-                                    section_id = section.getInt("id");
-                                    if(section.getString("floor") != "null")
-                                        floor = section.getInt("floor");
-
-                                    beacons.get(beacon_id).floors.put(floor, section_id);
-                                }
-                                catch(NumberFormatException e)
-                                {
-                                    Message.message(context, "ERROR: " + e);
-                                }
-                            }
+                            beacons.get(beacon_id).floors.put(floor, section_id);
+                        }
+                        catch(NumberFormatException e)
+                        {
+                            Message.message(context, "ERROR: " + e);
                         }
                     }
                 }
@@ -289,38 +262,35 @@ public class Request {
                         // Save info of the array in the JSONObject
                         JSONObject beacon = (JSONObject) array.get(i);
 
-                        if(beacon.getString("has_beacon") == "t") //If a beacon exists in the JSONObject
-                        {
-                            // Obtain the info inside of every
-                            // attribute inside of the object
-                            String uuid = beacon.getString("uuid");
-                            int major, minor, hall, v1, v2, id;
-                            major = minor = hall = v1 = v2 = id = 0;
-                            float posX, posY;
-                            posX = posY = 0;
+                        // Obtain the info inside of every
+                        // attribute inside of the object
+                        String uuid = beacon.getString("uuid");
+                        int major, minor, hall, v1, v2, id;
+                        major = minor = hall = v1 = v2 = id = 0;
+                        float posX, posY;
+                        posX = posY = 0;
 
-                            //Catch parsing error from the JSON Object
-                            try {
-                                id = Integer.parseInt(beacon.getString("id"));
-                                major = Integer.parseInt(beacon.getString("major"));
-                                minor = Integer.parseInt(beacon.getString("minor"));
-                                v1 = Integer.parseInt(beacon.getString("vertex_1"));
-                                v2 = Integer.parseInt(beacon.getString("vertex_2"));
-                                if(beacon.getString("hall") != "null")
-                                    hall = Integer.parseInt(beacon.getString("hall"));
-                                if(beacon.getString("x") != "null")
-                                    posX = Float.parseFloat(beacon.getString("x"));
-                                if(beacon.getString("y") != "null")
-                                    posY = Float.parseFloat(beacon.getString("y"));
-                            }
-                            catch(NumberFormatException e)
-                            {
-                                Message.message(context, "ERROR: " + e);
-                            }
-
-                            // Insert the Beacons object with the corresponding configurations in the beacons array
-                            beacons.put(id, new Bicon(uuid, major, minor, hall, posX, posY, id, v1, v2));
+                        //Catch parsing error from the JSON Object
+                        try {
+                            id = Integer.parseInt(beacon.getString("id"));
+                            major = Integer.parseInt(beacon.getString("major"));
+                            minor = Integer.parseInt(beacon.getString("minor"));
+                            v1 = Integer.parseInt(beacon.getString("vertex_1"));
+                            v2 = Integer.parseInt(beacon.getString("vertex_2"));
+                            if(beacon.getString("hall") != "null")
+                                hall = Integer.parseInt(beacon.getString("hall"));
+                            if(beacon.getString("x") != "null")
+                                posX = Float.parseFloat(beacon.getString("x"));
+                            if(beacon.getString("y") != "null")
+                                posY = Float.parseFloat(beacon.getString("y"));
                         }
+                        catch(NumberFormatException e)
+                        {
+                            Message.message(context, "ERROR: " + e);
+                        }
+
+                        // Insert the Beacons object with the corresponding configurations in the beacons array
+                        beacons.put(id, new Bicon(uuid, major, minor, hall, posX, posY, id, v1, v2));
                     }
                     setFloorsNAdj(); //Set the floors and the adjacencies in the hashmap of the Bicon class objects
                 }
