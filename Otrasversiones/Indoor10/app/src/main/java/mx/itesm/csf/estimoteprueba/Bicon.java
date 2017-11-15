@@ -1,5 +1,7 @@
 package mx.itesm.csf.estimoteprueba;
 
+import com.estimote.mgmtsdk.feature.settings.api.Beacon;
+import com.estimote.coresdk.common.config.EstimoteSDK;
 import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
 
 import java.util.HashMap;
@@ -8,25 +10,37 @@ import java.util.UUID;
 public class Bicon {
 
     protected BeaconRegion region;
+    protected int hall; //pasillo
     int[] beaconsInAdjacency = null;
+    float x, y;
     int minor, major, zone;
     UUID uuid_beacon;
+    int vertex_1, vertex_2;
     String region_id;
     HashMap<Integer, Integer> floors = new HashMap<Integer, Integer>();
 
-    Bicon(String uuid, int maj, int min, int depZone)
+    Bicon(String uuid, int maj, int min, int hal, float posX, float posY, int depZone, int v1, int v2)
     {
         uuid_beacon = UUID.fromString(uuid);
         major = maj;
         minor = min;
+        vertex_1 = v1;
+        vertex_2 = v2;
         zone = depZone;
         region_id = "ranged region ";
         region = new BeaconRegion(region_id + zone, uuid_beacon, major, minor);
-        //Message.message(cont, "Se creo una region con minor de " + minor);
+        hall = hal;
+        x = posX;
+        y = posY;
     }
 
     public int getZone(){ return zone; }
     public void setFloor(int fl, int id){ floors.put(fl, id); }
+    public int getHall()
+    {
+        return hall;
+    }
+    public void setHall(int a) { hall = a; }
     public String getRegionID(){ return region_id; }
     public void setRegion(BeaconRegion zone){ region = zone; }
     public BeaconRegion getRegion(){return region;}
@@ -41,30 +55,14 @@ public class Bicon {
     public void initializeBiA(int x) {beaconsInAdjacency = new int[x];}
     public void insertBiA(int x, int z) {beaconsInAdjacency[x] = z;}
     public int[] getBiA() {return beaconsInAdjacency;}
-    public int getBiASize()
-    {
-        if(beaconsInAdjacency == null)
-            return 0;
-        else
-            return beaconsInAdjacency.length;
-    }
-
-    public int getFloorsSize()
-    {
-        return floors.size();
-    }
 
     public boolean isAdjacent(int x)
     {
-        if(beaconsInAdjacency != null)
+        for(int i = 0; i < beaconsInAdjacency.length; i++)
         {
-            for(int i = 0; i < beaconsInAdjacency.length; i++)
-            {
-                if(x == beaconsInAdjacency[i])
-                    return true;
-            }
+            if(x == beaconsInAdjacency[i])
+                return true;
         }
         return false;
     }
-
 }
