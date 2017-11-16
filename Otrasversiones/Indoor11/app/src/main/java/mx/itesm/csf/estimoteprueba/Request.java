@@ -63,8 +63,11 @@ public class Request {
 
     public void setFloorsNAdj()
     {
-        RequestFloors("sectionBeaconFloor");
-        RequestAdjacencies("adjacencies");
+        for (Bicon beacon : beacons.values())
+        {
+            RequestFloors("sectionBeacon_id", String.valueOf(beacon.getZone()));
+            RequestAdjacencies("adjacencies", String.valueOf(beacon.getZone()));
+        }
     }
 
     // Connection to the external database (Predix)
@@ -115,7 +118,7 @@ public class Request {
     }
 
 
-    public void RequestAdjacencies(final String status) //status = adjacencies
+    public void RequestAdjacencies(final String status, final String BID) //status = adjacencies, BID = beacon_id
     {
         StringRequest sr = new StringRequest(com.android.volley.Request.Method.POST, URL, new Response.Listener<String>()
         {
@@ -123,17 +126,39 @@ public class Request {
             public void onResponse(String response)
             {
                 //Message.message(context, "response in Adjacencies");
+                int zona = Integer.parseInt(BID);
+
                 try
                 {
-                    JSONArray array = new JSONArray(response);
+                    JSONObject object = new JSONObject(response);
 
-                    for (int i = 0; i < array.length(); i++)
+                    if(object.getString("status").equals("001"))
                     {
-                        JSONObject adjacent = (JSONObject) array.get(i);
+                        beacons.get(zona).initializeBiA(object.length() - 1);
+                        Iterator<String> keys = object.keys();
+                        int i = 0;
 
-                        int beacon_id = adjacent.getInt("beacon_id");
-                        int adjbeacon_id = adjacent.getInt("adjacent_beacon_id");
-                        beacons.get(beacon_id).insertBiA(adjbeacon_id);
+                        while( keys.hasNext() )
+                        {
+                            String key = keys.next();
+
+                            if (!key.equals("status"))
+                            {
+                                JSONObject adjBeacon = object.getJSONObject(key);
+
+                                try
+                                {
+                                    int adjacent_id = adjBeacon.getInt("adjacent");
+                                    beacons.get(zona).insertBiA(i,adjacent_id); //Insert adjacent beacon to the Bicon object
+                                }
+                                catch(NumberFormatException e)
+                                {
+                                    Message.message(context, "ERROR: " + e);
+                                }
+
+                                i++;
+                            }
+                        }
                     }
                 }
                 catch (JSONException e)
@@ -154,6 +179,7 @@ public class Request {
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
                 params.put("s", status);
+                params.put("beacon_id", BID);
                 return params;
             }
 
@@ -170,7 +196,7 @@ public class Request {
     }
 
 
-    public void RequestFloors(final String status) //status = "sectionBeaconFloor"
+    public void RequestFloors(final String status, final String BID) //status = "sectionBeacon_id", beacon_id = BID
     {
         StringRequest sr = new StringRequest(com.android.volley.Request.Method.POST, URL, new Response.Listener<String>()
         {
@@ -180,21 +206,37 @@ public class Request {
                 //Message.message(context, "response in Floors");
                 try
                 {
-                    JSONArray array = new JSONArray(response);
+                    JSONObject object = new JSONObject(response);
 
-                    for(int i = 0; i < array.length(); i++)
+                    if(object.getString("status").equals("001"))
                     {
-                        JSONObject region = (JSONObject) array.get(i);
+                        Iterator<String> keys = object.keys();
 
-                        if(!region.getString("beacon_minor").equals("null"))
+                        while(keys.hasNext())
                         {
-                            int beacon_id = region.getInt("beacon_id");
-                            int section_id = region.getInt("section_id");
+                            String key = keys.next();
 
-                            if(region.getString("floor").equals("null"))
-                                beacons.get(beacon_id).setFloor(1, section_id);
-                            else
-                                beacons.get(beacon_id).setFloor(region.getInt("floor"), section_id);
+                            if (!key.equals("status"))
+                            {
+                                JSONObject section = object.getJSONObject(key);
+
+                                int beacon_id, section_id, floor;
+                                beacon_id = section_id = floor = 0;
+
+                                try
+                                {
+                                    beacon_id = section.getInt("beacon_id");
+                                    section_id = section.getInt("id");
+                                    if(section.getString("floor") != "null")
+                                        floor = section.getInt("floor");
+
+                                    beacons.get(beacon_id).setFloor(floor, section_id);
+                                }
+                                catch(NumberFormatException e)
+                                {
+                                    Message.message(context, "ERROR: " + e);
+                                }
+                            }
                         }
                     }
                 }
@@ -216,6 +258,7 @@ public class Request {
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
                 params.put("s", status);
+                params.put("beacon_id", BID);
                 return params;
             }
 

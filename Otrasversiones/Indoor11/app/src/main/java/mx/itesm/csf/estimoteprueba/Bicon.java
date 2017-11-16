@@ -4,12 +4,11 @@ import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
 
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.Vector;
 
 public class Bicon {
 
     protected BeaconRegion region;
-    Vector<Integer> beaconsInAdjacency = new Vector<Integer>();
+    int[] beaconsInAdjacency = null;
     int minor, major, zone;
     UUID uuid_beacon;
     String region_id;
@@ -31,21 +30,23 @@ public class Bicon {
     public String getRegionID(){ return region_id; }
     public void setRegion(BeaconRegion zone){ region = zone; }
     public BeaconRegion getRegion(){return region;}
-    public void setBiA(Vector<Integer> adj) {beaconsInAdjacency = adj;}
+    public int[] getBeaconsInAdjacency() {return beaconsInAdjacency;}
+    public void setBiA(int[] adj) {beaconsInAdjacency = adj;}
     public int getMinor() {return minor;}
     public void setMinor(int x) {minor = x;}
     public int getMajor() {return major;}
     public void setMajor(int x) {major = x;}
     public UUID getUUID() {return uuid_beacon;}
     public void setUUID(UUID u) {uuid_beacon = u;}
-    public void insertBiA(int x) {beaconsInAdjacency.add(x);}
-    public Vector<Integer> getBiA() {return beaconsInAdjacency;}
+    public void initializeBiA(int x) {beaconsInAdjacency = new int[x];}
+    public void insertBiA(int x, int z) {beaconsInAdjacency[x] = z;}
+    public int[] getBiA() {return beaconsInAdjacency;}
     public int getBiASize()
     {
         if(beaconsInAdjacency == null)
             return 0;
         else
-            return beaconsInAdjacency.size();
+            return beaconsInAdjacency.length;
     }
 
     public int getFloorsSize()
@@ -57,12 +58,13 @@ public class Bicon {
     {
         if(beaconsInAdjacency != null)
         {
-            for(int i = 0; i < beaconsInAdjacency.size(); i++)
+            for(int i = 0; i < beaconsInAdjacency.length; i++)
             {
-                if(x == beaconsInAdjacency.get(i))
+                if(x == beaconsInAdjacency[i])
                     return true;
             }
         }
         return false;
     }
+
 }

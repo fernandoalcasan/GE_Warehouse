@@ -123,7 +123,7 @@ public class conexion extends AppCompatActivity {
     {
         for(Integer zon: queueZones)
         {
-            Message.message(getApplicationContext(), "Buscando en los " + BeaconsDeployed.get(zon).getFloorsSize() + " pisos y las " + BeaconsDeployed.get(zon).getBiASize() + " zonas adyacentes de la zona " + BeaconsDeployed.get(zon).getZone());
+            //Message.message(getApplicationContext(), "Buscando en los " + BeaconsDeployed.get(zon).getFloorsSize() + " pisos y las " + BeaconsDeployed.get(zon).getBiASize() + " zonas adyacentes de la zona " + BeaconsDeployed.get(zon).getZone());
             if(BeaconsDeployed.get(zon).isAdjacent(x))
                 return true;
         }
