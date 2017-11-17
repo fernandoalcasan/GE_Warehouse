@@ -2,16 +2,13 @@ package mx.itesm.csf.estimoteprueba;
 
 import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
 
-import org.altbeacon.beacon.Identifier;
-import org.altbeacon.beacon.Region;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.Vector;
 
 public class Bicon {
 
-    //protected BeaconRegion region;
-    protected Region region;
+    protected BeaconRegion region;
     Vector<Integer> beaconsInAdjacency = new Vector<Integer>();
     int minor, major, zone;
     UUID uuid_beacon;
@@ -25,18 +22,15 @@ public class Bicon {
         minor = min;
         zone = depZone;
         region_id = "ranged region ";
-        region = new Region(region_id + zone, Identifier.parse(uuid), Identifier.parse(String.valueOf(major)), Identifier.parse(String.valueOf(minor)));
-        //region = new BeaconRegion(region_id + zone, uuid_beacon, major, minor);
+        region = new BeaconRegion(region_id + zone, uuid_beacon, major, minor);
         //Message.message(cont, "Se creo una region con minor de " + minor);
     }
 
     public int getZone(){ return zone; }
     public void setFloor(int fl, int id){ floors.put(fl, id); }
     public String getRegionID(){ return region_id; }
-    //public void setRegion(BeaconRegion zone){ region = zone; }
-    //public BeaconRegion getRegion(){return region;}
-    public void setRegion(Region r) {region = r;}
-    public Region getRegion() {return region;}
+    public void setRegion(BeaconRegion zone){ region = zone; }
+    public BeaconRegion getRegion(){return region;}
     public void setBiA(Vector<Integer> adj) {beaconsInAdjacency = adj;}
     public int getMinor() {return minor;}
     public void setMinor(int x) {minor = x;}
